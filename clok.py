@@ -1,61 +1,72 @@
-from playsound import playsound
+#!/usr/bin/python3
+
+import pygame
 import time
-from datetime import datetime 
+import sys
+import os
+from datetime import datetime
 from pogoda import get_info_weather
-def clock():
-    pass
-        
+
+
 def get_setting_clock():
-    hour = int(input("Введите час: "))
-    if len(str(hour)) == 1:
-        hour = "0" + str(hour)
-    minute = int(input("Введите минуты: "))
-    if len(str(minute)) == 1:
-        minute = "0" + str(minute)
-    second = int(input("Введите секунды: "))
-    if len(str(second)) == 1:
-        second = "0" + str(second)
+    hour = input("Введите часы: ").zfill(2)
+    minute = input("Введите минуты: ").zfill(2)
+    second = '00'
     timer = f"{hour}:{minute}:{second}"
     return timer
 
-def timer_cikl(file_path, temp):
+
+def get_current_time():
+    return datetime.now().strftime("%H:%M:%S")
+
+
+def play_sound(file_path):
+    if not os.path.exists(file_path):
+        print(f"Файл не найден: {file_path}")
+        return
+
+    try:
+        pygame.mixer.init()
+        pygame.mixer.music.load(file_path)
+        pygame.mixer.music.play()
+        while pygame.mixer.music.get_busy():
+            pygame.time.Clock().tick(10)
+    except Exception as e:
+        print(f"Ошибка воспроизведения звука: {e}")
+
+
+def timer_cycle(file_path):
     timer = get_setting_clock()
-    
-    print(timer)
-    hour = timer[0]
-    if len(str(hour)) == 1:
-        hour = "0" + str(hour)
-    minute = timer[1]
-    if len(str(minute)) == 1:
-        minute = "0" + str(minute)
-    second = timer[2]
-    if len(str(second)) == 1:
-        second = "0" + str(second)
     print(f"Будильник установлен на: {timer}")
     print("Счастливо отработать!!! Берегите нервы!!!")
-       
+
+    time_start = get_current_time()
+    time_end = timer
+    delta_time = datetime.strptime(time_end, "%H:%M:%S") - datetime.strptime(time_start, "%H:%M:%S")
+    print(f"До будильника осталось: {delta_time}")
+    print('=' * 40)
+
     while True:
-        now = datetime.now()
-        current_time = now.strftime("%H:%M:%S")
-        print(current_time, end="\r")
-        time_start = current_time
-        time_end = timer
-        delta_time = datetime.strptime(time_end, "%H:%M:%S") - datetime.strptime(time_start, "%H:%M:%S")
-        
+        current_time = get_current_time()
+        print(f"\rТекущее время: {current_time}", end="")
+        sys.stdout.flush()
         time.sleep(1)
         if current_time == timer:
-            print("Пора собираться!!!")
-            time.sleep(1)
-            temp = get_info_weather()
-            playsound(file_path)
-            print('Температура за бортом: ', temp)
+            print("\nПора собираться!!!")
+            play_sound(file_path)
+            print(get_info_weather())
             break
-    print(f"{current_time} == {hour}:{minute}:{second}")
-    print(f"Рабочее время вышло, будильник выключен. До завтра!!!")
-        
+
+    print(f"{current_time} == {timer}")
+    print("Рабочее время вышло, будильник выключен. До завтра!!!")
+    print('=' * 40)
+
+
 def main():
-    timer_cikl(file_path=file_path, temp=temp)
-temp = get_info_weather()
-file_path = "Tishiny_tishiny_khochu_sample.mp3"
+    file_path = "Tishiny_tishiny_khochu_sample.mp3"  # Убедись, что этот файл существует
+    print(get_info_weather())
+    timer_cycle(file_path)
+
+
 if __name__ == "__main__":
     main()
