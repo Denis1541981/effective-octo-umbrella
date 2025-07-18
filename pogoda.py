@@ -3,7 +3,7 @@ import json
 import time
 
 
-API = '07bd3abda71092417b445c7e621b737a'
+
 def get_info_weather():
     """Получение данных о погоде, по умолчанию Бердск"""
 
